@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 #define BUFFER_SIZE 1024
+void clear();
 void execute_cd(char *command);
 void execute_command(char *command);
 void handle_redirection(char *command);
