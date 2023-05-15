@@ -18,7 +18,9 @@ int main(void)
 		{
 			if (clear_requested)
 			{
-				system("clear");/*Clear the terminal screen*/
+				/*system("clear";Clear the terminal screen*/
+				clear();
+				clear_requested = 0;
 			}
 			write(STDOUT_FILENO, "$ ", 2);
 			length = read(STDIN_FILENO, buffer, BUFFER_SIZE);
