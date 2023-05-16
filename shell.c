@@ -7,7 +7,7 @@ int main(void)
 {
 	char buffer[BUFFER_SIZE];
 	ssize_t length;
-	char command[100];
+	/*char command[100];*/
 	int clear_requested = 0;
 
 	setenv("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", 1);
@@ -36,7 +36,11 @@ int main(void)
 			}
 			else if (_strncmp(buffer, "cd", 2) == 0)
 			{
-				execute_cd(buffer);
+				execute_cd(buffer);/*executes cd command*/
+			}
+			else if (_strncmp(buffer, "env", 3) == 0)
+			{
+				print_environment();/*prints current environment*/
 			}
 			else if (_strcmpr(buffer, "clear") == 0)
 			{

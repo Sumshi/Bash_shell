@@ -13,6 +13,7 @@
 
 #define BUFFER_SIZE 1024
 int clear();
+void print_environment();
 int check_command_existence(const char *command);
 void execute_cd(char *command);
 void execute_command(char *command);

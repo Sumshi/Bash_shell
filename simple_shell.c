@@ -15,7 +15,7 @@ void execute_command(char *command)
 	if (pid == -1)/*error occured during forking*/
 	{
 		perror("error");
-		exit(EXIT_FAILURE);
+		exit(98);
 	}
 	else if (pid == 0)
 	{ /* child process */
@@ -32,7 +32,7 @@ void execute_command(char *command)
 				if (input_fd == -1)
 				{
 					perror("open error");
-					exit(EXIT_FAILURE);
+					exit(98);
 				}
 				for (j = index; args[j] != NULL; j++)
 				{
@@ -47,7 +47,7 @@ void execute_command(char *command)
 				if (output_fd == -1)
 				{
 					perror("open error");
-					exit(EXIT_FAILURE);
+					exit(98);
 				}
 				for (j = index; args[j] != NULL; j++)
 				{
@@ -69,7 +69,7 @@ void execute_command(char *command)
 		if (path[i] == NULL)
 		{
 			fprintf(stderr, "Command not found: %s\n", args[0]);
-			exit(EXIT_FAILURE);
+			exit(98);
 		}
 		/*Redirect input/output*/
 		if (input_fd != STDIN_FILENO)
@@ -77,7 +77,7 @@ void execute_command(char *command)
 			if (dup2(input_fd, STDIN_FILENO) == -1)
 			{
 				perror("dup2 error");
-				exit(EXIT_FAILURE);
+				exit(98);
 			}
 			close(input_fd);
 		}
@@ -86,7 +86,7 @@ void execute_command(char *command)
 			if (dup2(output_fd, STDOUT_FILENO) == -1)
 			{
 				perror("dup2 error");
-				exit(EXIT_FAILURE);
+				exit(98);
 			}
 			close(output_fd);
 		}
@@ -94,7 +94,7 @@ void execute_command(char *command)
 		if (execve(command_path, args, NULL) == -1)
 		{
 			perror("execve error");
-			exit(EXIT_FAILURE);
+			exit(98);
 		}
 	}
 	else
