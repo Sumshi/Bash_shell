@@ -7,7 +7,6 @@ int main(void)
 {
 	char buffer[BUFFER_SIZE];
 	ssize_t length;
-	/*char command[100];*/
 	int clear_requested = 0;
 
 	setenv("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", 1);
@@ -18,7 +17,6 @@ int main(void)
 		{
 			if (clear_requested)
 			{
-				/*system("clear";Clear the terminal screen*/
 				clear();
 				clear_requested = 0;
 			}
@@ -46,11 +44,14 @@ int main(void)
 			{
 				clear_requested = 1;/*executes clear()*/
 			}
+			else if (strcmp(buffer, "alias") == 0)
+			{
+				displayAliases();
+			}
 			else
 			{
 				execute_command(buffer);
 			}
-			/*system("clear");*/
 		}
 	}
 	else

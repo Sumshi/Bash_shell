@@ -13,11 +13,14 @@
 
 #define BUFFER_SIZE 1024
 int clear();
+void displayAliases();
 void print_environment();
 int check_command_existence(const char *command);
 void execute_cd(char *command);
 void execute_command(char *command);
 void handle_redirection(char *command);
+void handle_input_redirection(char **args);
+void handle_output_redirection(char **args);
 char **tokenize(char *str, char *delimiter);
 unsigned int _strlen(char *str);
 char *_strcpy(char *dest, char *src);
