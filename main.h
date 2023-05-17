@@ -10,8 +10,9 @@
 #include <limits.h>
 #include <signal.h>
 #include <fcntl.h>
-
+#include<stdbool.h>
 #define BUFFER_SIZE 1024
+
 int clear();
 void displayAliases();
 void print_environment();

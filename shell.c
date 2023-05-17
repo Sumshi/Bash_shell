@@ -8,13 +8,15 @@ int main(void)
 	char buffer[BUFFER_SIZE];
 	ssize_t length;
 	int clear_requested = 0;
-
+	bool pipe = false;
 	setenv("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", 1);
 	setenv("TERM", "xterm", 1);
-	if (isatty(fileno(stdin)))
-	{/*Checks if standard input is the terminal*/
-		while (1)
-		{
+	/*if (isatty(STDIN_FILENO) == 1)*/
+	/*Checks if standard input is the terminal*/
+	while (1 && !pipe)
+	{
+		if (isatty(STDIN_FILENO) == 0)
+			pipe = true;
 			if (clear_requested)
 			{
 				clear();
@@ -52,15 +54,6 @@ int main(void)
 			{
 				execute_command(buffer);
 			}
-		}
-	}
-	else
-	{/*Non-interactive mode = reads command from a file eg .sh scripts*/
-		while ((length = read(STDIN_FILENO, buffer, BUFFER_SIZE)) > 0)
-		{
-			buffer[length - 1] = '\0';
-			execute_command(buffer);
-		}
 	}
 	return 0;
 }
