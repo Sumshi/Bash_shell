@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -68,6 +69,42 @@ char *getAbsolutePath(char *command) {
 
     return NULL;
 }
+void printEnv() {
+    extern char **environ;
+    for (char **env = environ; *env != NULL; env++) {
+        printf("%s\n", *env);
+    }
+}
+int changeDirectory(char *directory) {
+    if (directory == NULL || strcmp(directory, "~") == 0) { // Handle no argument or ~
+        directory = getenv("HOME");
+    }
+
+    if (strcmp(directory, "-") == 0) { // Handle -
+        directory = getenv("OLDPWD");
+        char *msg = "Changing to previous directory: ";
+        write(STDOUT_FILENO, msg, strlen(msg));
+        write(STDOUT_FILENO, directory, strlen(directory));
+        write(STDOUT_FILENO, "\n", 1);
+    }
+
+    char cwd[BUFFER_SIZE];
+    getcwd(cwd, BUFFER_SIZE); // Get current working directory
+
+    if (chdir(directory) != 0) { // Change the directory
+        perror("cd error");
+        return -1;
+    }
+
+    char newCwd[BUFFER_SIZE];
+    getcwd(newCwd, BUFFER_SIZE); // Get new current working directory
+
+    setenv("OLDPWD", cwd, 1); // Set OLDPWD environment variable
+    setenv("PWD", newCwd, 1); // Set PWD environment variable
+
+    return 0;
+}
+
 int main(void) {
     char buffer[BUFFER_SIZE];
     ssize_t length;
@@ -92,8 +129,20 @@ int main(void) {
         
 		parseInput(buffer, args);
 
-		if (strcmp(args[0], "exit") == 0) {
-			break; // Exit the shell
+		if (strcmp(args[0], "exit") == 0) { // Handle exit command
+			int status = EXIT_SUCCESS;
+			if (args[1] != NULL) { // If argument is provided
+				status = atoi(args[1]); // Convert to integer
+			}
+			exit(status); // Exit the shell with given status
+		} else if (strcmp(args[0], "env") == 0) { // Handle env command
+			printEnv();
+			continue;
+		} else if (strcmp(args[0], "cd") == 0) { // Handle cd command
+			if (changeDirectory(args[1]) != 0) {
+				continue;
+			}
+			continue;
 		}
 
 		char *cmd = getAbsolutePath(args[0]);

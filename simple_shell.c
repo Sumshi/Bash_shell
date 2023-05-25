@@ -1,93 +1,85 @@
 #include "main.h"
-void execute_command(char *command)
-{
-	char buffer[BUFFER_SIZE], command_path[BUFFER_SIZE];
-	pid_t pid;
-	int status, index, j;
-	char *path[] = { "/bin/", "/usr/bin/", NULL };
-	char *args[BUFFER_SIZE];
-	int arg_index = 0;
-	int input_fd = STDIN_FILENO, output_fd = STDOUT_FILENO;
-	int i = 0;
-	char **input_args, **output_args;
-	_strcpy(buffer, command);
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("error");
-		exit(EXIT_FAILURE);
-	}
-	else if (pid == 0)
-	{ /* child process */
-		args[arg_index++] = _strtok(buffer, " ");
-		while (args[arg_index - 1] != NULL) {
-			args[arg_index++] = _strtok(NULL, " ");
-		}
-		for (index = 0; args[index] != NULL; index++)
-		{
-			if (args[index][0] == '<')
-			{
-				input_args = &args[index + 1];
-				handle_input_redirection(input_args);
-				for (j = index; args[j] != NULL; j++)
-				{
-					args[j] = args[j + 2];
-				}
-				arg_index -= 2;
-				index--;
-			}
-			else if (args[index][0] == '>')
-			{
-				output_args = &args[index + 1];
-				handle_output_redirection(output_args);
-				for (j = index; args[j] != NULL; j++)
-				{
-					args[j] = args[j + 2];
-				}
-				arg_index -= 2;
-				index--;
-			}
-		}
-		while (path[i] != NULL)
-		{
-			_strcpy(command_path, path[i]);
-			_strcat(command_path, args[0]);
-			if (access(command_path, X_OK) == 0)
-				{
-					break;
-				}
-			i++;
-		}
-		if (path[i] == NULL)
-		{
-			fprintf(stderr, "Command not found: %s\n", args[0]);
-			exit(98);
-		}
-		if (input_fd != STDIN_FILENO) {
-			if (dup2(input_fd, STDIN_FILENO) == -1)
-			{
-				perror("dup2 error");
-				exit(EXIT_FAILURE);
-			}
-			close(input_fd);
-		}
-		if (output_fd != STDOUT_FILENO)
-		{
-			if (dup2(output_fd, STDOUT_FILENO) == -1)
-			{
-				perror("dup2 error");
-				exit(EXIT_FAILURE);
-			}
-			close(output_fd);
-		}
-		if (execve(command_path, args, NULL) == -1)
-		{
-			perror("execve error");
-			exit(EXIT_FAILURE);
-		}
-	}
-	else
-	{ /* parent process */
-		waitpid(pid, &status, 0);
-	}
+int main() {
+        char buffer[BUFFER_SIZE];
+        ssize_t length;
+        int clear_requested = 0;
+
+        while (1) {
+                if (isatty(STDIN_FILENO)) {
+                        write(STDOUT_FILENO, "$ ", 2);
+                }
+
+                length = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+                if (clear_requested) { // Clear the screen before executing the command
+                        clear();
+                        clear_requested = 0;
+                }
+
+                if (length == -1) {
+                        perror("Error from read");
+                        exit(EXIT_FAILURE);
+                }
+                if (length == 0) {
+                        break;
+                }
+                if (buffer[length - 1] == '\n') {
+                        buffer[length - 1] = '\0';
+                }
+
+                char *args[MAX_ARGS + 1]; /* 1 for null terminator */
+
+                parseInput(buffer, args);
+
+                if (strcmp(args[0], "exit") == 0) { // Handle exit command
+                        int status = EXIT_SUCCESS;
+                        if (args[1] != NULL) { // If argument is provided
+                                status = atoi(args[1]); // Convert to integer
+                        }
+                        exit(status); // Exit the shell with given status
+                } else if (strcmp(args[0], "env") == 0) { // Handle env command
+                        printEnv();
+                        continue;
+                } else if (strcmp(args[0], "cd") == 0) { // Handle cd command
+                        if (changeDirectory(args[1]) != 0) {
+                                continue;
+                        }
+                } else if (strcmp(args[0], "setenv") == 0) { // Handle setenv command
+                        if (args[1] == NULL || args[2] == NULL) {
+                                char msg[] = "Usage: setenv VARIABLE VALUE\n";
+                                write(STDOUT_FILENO, msg, strlen(msg));
+                                continue;
+                        }
+                        if (mySetEnv(args[1], args[2]) != 0) {
+                                continue;
+                        }
+                } else if (strcmp(args[0], "unsetenv") == 0) { // Handle unsetenv command
+                        if (args[1] == NULL) {
+                                char msg[] = "Usage: unsetenv VARIABLE\n";
+                                write(STDOUT_FILENO, msg, strlen(msg));
+                                continue;
+                        }
+                        if (myUnsetEnv(args[1]) != 0) {
+                                continue;
+                        }
+                } else if (strcmp(args[0], "clear") == 0) { // Handle clear command
+                        clear_requested = 1;
+                } else {
+                        char *cmd = getAbsolutePath(args[0]);
+
+                        if (cmd == NULL) {
+                                char msg[] = ": command not found\n";
+                                write(STDOUT_FILENO, args[0], strlen(args[0]));
+                                write(STDOUT_FILENO, msg, strlen(msg));
+                        } else {
+                                executeCommand(cmd, args);
+                        }
+
+                        free(cmd);
+                }
+
+                continue; // Move the continue statement to the end of the loop body
+        }
+
+        return 0;
 }
+
