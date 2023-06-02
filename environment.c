@@ -1,23 +1,17 @@
 #include "main.h"
-/*void print_environment() {
-  extern char **environ; // The environment variable
-  char **env = environ;
-
-  while (*env)
-  {
-  printf ("%s\n", *env);
-  env++;
-  }
-  }*/
-void print_environment()
+/**
+ * printEnv - prints environment
+ * Return: Always 0.
+ */
+void printEnv(void)
 {
-	extern char **environ;
-	char **env = environ;
+	char **env;
+	size_t len;
 
-	while (*env)
+	for (env = environ; *env != NULL; env++)
 	{
-		write(STDOUT_FILENO, *env, strlen(*env));
+		len = _strlen(*env);
+		write(STDOUT_FILENO, *env, len);
 		write(STDOUT_FILENO, "\n", 1);
-		env++;
 	}
 }

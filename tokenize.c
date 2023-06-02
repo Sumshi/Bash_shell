@@ -8,13 +8,13 @@
 char **tokenize(char *str, char *delimiter)
 {
 	char **tokens = NULL;
-	size_t token_count = 0, capacity = 10;
+	size_t token_count = 0, cap = 10;
 	char *token;
 	char **new_tokens;
 
 	if (str == NULL)
 		return (NULL);
-	tokens = malloc(sizeof(char *) * capacity);
+	tokens = malloc(sizeof(char *) * cap);
 	if (tokens == NULL)
 	{
 		perror("Memory allocation failed");
@@ -26,10 +26,10 @@ char **tokenize(char *str, char *delimiter)
 		if (token == NULL)
 			break;
 		tokens[token_count++] = token;
-		if (token_count == capacity)
+		if (token_count == cap)
 		{
-			capacity *= 2;
-			new_tokens = realloc(tokens, sizeof(char *) * capacity);
+			cap *= 2;
+			new_tokens = my_realloc(tokens, sizeof(char *) * cap, sizeof(char *) * cap);
 			if (new_tokens == NULL)
 			{
 				perror("Memory reallocation error");

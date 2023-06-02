@@ -31,7 +31,6 @@ char *_strcpy(char *dest, char *src)
 
 	return (dest);
 }
-
 /**
  * _strcat - concatenates two strings
  *@dest: destination string
